@@ -1,0 +1,55 @@
+void heartBeat() {
+  // Primera pulsación (sístole)
+  for (int brightness = 0; brightness < 255; brightness += 2) {
+    setAllLEDsColor(strip.Color(brightness, 0, 0)); // Color rojo más oscuro
+    strip.show();
+    //delay(10); // Ajusta el retardo para controlar la velocidad de subida
+  }
+  
+  delay(100); // Pausa breve entre sístole y diástole
+  
+  for (int brightness = 254; brightness >= 0; brightness -= 2) {
+    setAllLEDsColor(strip.Color(brightness, 0, 0)); // Color rojo más oscuro
+    strip.show();
+    //delay(10); // Ajusta el retardo para controlar la velocidad de bajada
+  }
+  
+  // Pausa entre las pulsaciones
+  delay(250); // Ajusta la pausa para el ritmo del latido
+  
+  // Segunda pulsación (segunda sístole)
+  for (int brightness = 0; brightness < 255; brightness += 2) {
+    setAllLEDsColor(strip.Color(brightness, 0, 0)); // Color rojo más oscuro
+    strip.show();
+    //delay(10); // Ajusta el retardo para controlar la velocidad de subida
+  }
+  
+  delay(100); // Pausa breve entre sístole y diástole
+  
+  for (int brightness = 254; brightness >= 0; brightness -= 2) {
+    setAllLEDsColor(strip.Color(brightness, 0, 0)); // Color rojo más oscuro
+    strip.show();
+    //delay(10); // Ajusta el retardo para controlar la velocidad de bajada
+  }
+  
+  // Pausa entre las pulsaciones
+  delay(1000); // Pausa más larga entre los ciclos completos de latido
+}
+
+
+void desplazaLEDs(uint32_t color) { //desplazaLEDs(strip.Color(random(256), random(256), random(256)));
+  for (int i = LED_COUNT; i < NUM_LEDS + LED_COUNT; ++i) {
+    strip.setPixelColor(i, color);
+    //strip.show();
+    //if (i >= LED_COUNT) {
+      strip.setPixelColor(i - LED_COUNT, strip.Color(0, 0, 0));
+      strip.show();
+    //}
+    if (i >= NUM_LEDS) {
+      strip.setPixelColor(i - NUM_LEDS, color);
+      strip.show();
+    }
+
+    delay(tiempoEncendidoGradual);
+  }
+}
