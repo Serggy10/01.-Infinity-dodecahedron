@@ -4,6 +4,7 @@
 #include <SinricProDevice.h>
 #include <Capabilities/ModeController.h>
 #include <Capabilities/BrightnessController.h>
+#include <Capabilities/ColorController.h>
 #include <Adafruit_NeoPixel.h>
 #include <Colores.h>
 
@@ -17,10 +18,12 @@ extern std::map<String, String> globalModes;
 class Lampara
     : public SinricProDevice,
       public ModeController<Lampara>,
-      public BrightnessController<Lampara>
+      public BrightnessController<Lampara>,
+      public ColorController<Lampara>
 {
   friend class ModeController<Lampara>;
   friend class BrightnessController<Lampara>;
+  friend class ColorController<Lampara>;
 
 public:
   Lampara(const String &deviceId) : SinricProDevice(deviceId, " Lampara"), strip(NUM_LEDS, LED_PIN, NEO_GRB + NEO_KHZ800) {}; // Initialize the strip here
@@ -32,6 +35,17 @@ public:
     randomSeed(analogRead(4));
   }
   void SetColor(String _colorStr);
+
+  void SetColorRGB(uint8_t r, uint8_t g, uint8_t b)
+  {
+    uint32_t nuevo = strip.Color(r, g, b);
+    if (nuevo != color)
+    {
+      color = nuevo;
+      // Si quieres, podrías limpiar colorStr = ""; para indicar que no viene por nombre
+    }
+  }
+
   void SetModo(String _modo);
   void SetBrillo(uint8_t x);
   void Fill();
@@ -134,7 +148,7 @@ void Lampara::SetColor(String _colorStr)
 
 void Lampara::SetModo(String _modo)
 {
-  if (_modo != "Relleno" && _modo != "Estrellas" && _modo != "Rayo" && _modo != "Arcoiris" && _modo != "Circo" && _modo != "Latido")
+  if (_modo != "Relleno" && _modo != "Estrellas" && _modo != "Rayo" && _modo != "Arcoiris" && _modo != "Circo" && _modo != "Latido" && _modo != "Apagado")
     _modo = "Relleno";
 
   if (_modo != modo)
@@ -145,7 +159,7 @@ void Lampara::SetModo(String _modo)
       colorStr = "Blanco";
       globalModes["modeInstance1"] = "Blanco";
       sendModeEvent("modeInstance1", "Blanco", "PHYSICAL_INTERACTION");
-        }
+    }
     modo = _modo;
     strip.clear();
   }
@@ -200,6 +214,11 @@ void Lampara::Run()
   else if (modo == "Latido")
   {
     Latido(50);
+  }
+  else if (modo == "Apagado")
+  {
+    strip.clear();
+    strip.show();
   }
   else
     Serial.println("Modo: " + modo);

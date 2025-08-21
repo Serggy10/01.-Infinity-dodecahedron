@@ -33,7 +33,6 @@
 #define SSID ""
 #define PASS ""
 
-
 #define BAUD_RATE 9600
 
 Lampara &lampara = SinricPro[DEVICE_ID];
@@ -45,6 +44,8 @@ void TareaLEDs(void *pvParameters);
  * Global variables to store the device states *
  ***********************************************/
 
+// ColorController (RGB)
+uint8_t globalR = 0, globalG = 0, globalB = 0; // valor por defecto
 // PowerStateController
 bool globalPowerState;
 
@@ -82,6 +83,19 @@ bool onAdjustBrightness(const String &deviceId, int &brightnessDelta)
   return true;                        // request handled properly
 }
 
+// ColorController
+bool onColor(const String &deviceId, byte &r, byte &g, byte &b)
+{
+  Serial.printf("[Device: %s]: Color set to R:%d G:%d B:%d\r\n", deviceId.c_str(), r, g, b);
+  globalR = r;
+  globalG = g;
+  globalB = b;
+  // Si quieres, aquí podrías notificar con sendColorEvent(r,g,b)
+  if (globalModes["modeInstance2"] == "Apagado")
+    globalModes["modeInstance2"] = "Relleno";
+  return true;
+}
+
 /**********
  * Events *
  *************************************************
@@ -116,6 +130,9 @@ void setupSinricPro()
   // BrightnessController
   lampara.onBrightness(onBrightness);
   lampara.onAdjustBrightness(onAdjustBrightness);
+
+  // ColorController (RGB)
+  lampara.onColor(onColor);
 
   SinricPro.onConnected([]
                         { Serial.printf("[SinricPro]: Connected\r\n"); });
@@ -163,15 +180,14 @@ void setup()
       1);          // Núcleo en el que se ejecutará la tarea (1 para el segundo núcleo)
 }
 
-
-
 void TareaSinricPro(void *pvParametes)
 {
   for (;;)
   {
     SinricPro.handle();
     lampara.SetBrillo(globalBrightness);
-    lampara.SetColor(globalModes["modeInstance1"]);
+    lampara.SetColorRGB(globalR, globalG, globalB);
+    // lampara.SetColor(globalModes["modeInstance1"]);
     lampara.SetModo(globalModes["modeInstance2"]);
     delay(10);
   }

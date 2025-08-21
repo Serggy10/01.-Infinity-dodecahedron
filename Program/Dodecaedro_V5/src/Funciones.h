@@ -1,7 +1,5 @@
 #include <Adafruit_NeoPixel.h>
 
-#define LED_PIN 12
-#define LED_COUNT 126
 
 
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
